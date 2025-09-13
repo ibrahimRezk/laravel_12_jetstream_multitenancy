@@ -44,7 +44,7 @@ class PlanSeeder extends Seeder
             'description' => 'For large organizations',
             'price' => 500,
             'currency' => 'USD',
-                        'product_id_on_stripe' => 'prod_SlhYmiHNewl0to',
+            'product_id_on_stripe' => 'prod_SlhYmiHNewl0to',
             'price_id_on_stripe' => 'price_1RqA9aK0tau89y8TxU0lbI3s',
             'interval' => 'yearly',
             'features' => ['basic_features', 'advanced_features', 'enterprise_features', 'dedicated_support'],

@@ -1,4 +1,4 @@
-<script setup>
+d:\Courses\1-Programing\PHP\atef soft\HRMS\HRMS\resources\js\Components\Dropdown.vue<script setup>
 defineProps({
     type: {
         type: String,

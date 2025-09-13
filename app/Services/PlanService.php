@@ -187,7 +187,7 @@ class PlanService
                         $user->subscription($product)->cancelNow(); // immediate cancel
                     } else {
                         $user->subscription($product)->cancel();  // cancel at the end of subscription and no renewal
-                    }
+                    } 
                     ///////////////////////////////////////////////////////////////////////
                 }
 

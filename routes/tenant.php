@@ -27,6 +27,10 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 |
 */
 
+
+
+
+
 Route::middleware([
     'web',
     'auth:sanctum',

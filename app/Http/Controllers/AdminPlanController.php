@@ -41,11 +41,17 @@ class AdminPlanController extends Controller
             $plans = $this->planService->getAvailablePlans();
             $popularPlan = $this->planService->getPopularPlan();
             return Inertia::render('AdminControlPlans', [
+                'title' => 'plans',
                 'tenants' => auth()->user()->tenants, //added only to the admin  because if the tenant choose a plan we already know his id by tenant('id)
                 'popularPlan' => $popularPlan ? [
                     'id' => $popularPlan->plan_id,
                     'occurrences' => $popularPlan->occurrences
-                ] : null,
+                ] :
+                [
+                    'id' => Plan::first()->id,
+                    'occurrences' => 0,
+                ],
+
 
                 'routeResourceName' => $this->routeResourceName,
 
@@ -56,6 +62,8 @@ class AdminPlanController extends Controller
                         'description' => $plan->description,
                         'price' => (double) $plan->price * 1,
                         'currency' => $plan->currency,
+                        'price_id_on_stripe' => $plan->price_id_on_stripe,
+                        'product_id_on_stripe' => $plan->product_id_on_stripe,
                         'interval' => $plan->interval,
                         'features' => $plan->features,
                         'trial_days' => $plan->trial_days,

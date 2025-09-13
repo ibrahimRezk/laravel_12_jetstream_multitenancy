@@ -41,6 +41,7 @@ class TenantSubscription extends Model  // this to get all subscriptions history
         return $this->status === 'active' &&
             ($this->ends_at === null || $this->ends_at->isFuture());
     }
+   
 
     public function onTrial()
     {

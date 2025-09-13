@@ -7,12 +7,16 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { watch } from "vue";
+
 
 const form = useForm({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
+        subdomain: '',
+
     terms: false,
 });
 
@@ -21,6 +25,14 @@ const submit = () => {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+
+// to prevent space here and there is another code in the input  take a look at it
+watch(()=>form.subdomain  ,
+()=> form.subdomain = form.subdomain.replace(/ +/g, '')  )
+
+
+
 </script>
 
 <template>
@@ -44,6 +56,23 @@ const submit = () => {
                     autocomplete="name"
                 />
                 <InputError class="mt-2" :message="form.errors.name" />
+            </div>
+
+               <div class="mt-4 grid gap-2">
+                <InputLabel for="subdomain"  > subdomain </InputLabel>
+                <TextInput
+                    id="subdomain"
+                    v-model="form.subdomain"
+                    type="text"
+                    class="mt-1 block w-full"
+
+                    pattern="[A-Za-z0-9]+"
+                    onkeydown="if(['Space'].includes(arguments[0].code)){return false;}"
+                    
+                    autofocus
+                    autocomplete="subdomain"
+                />
+                <InputError class="mt-2" :message="form.errors.subdomain" />
             </div>
 
             <div class="mt-4">

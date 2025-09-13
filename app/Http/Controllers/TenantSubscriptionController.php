@@ -34,6 +34,8 @@ class TenantSubscriptionController extends Controller
     {
         $tenant = auth()->user()->tenants()->first();
 
+        $subscription = $tenant->subscription()->latest('updated_at')->first();
+
         $plan = Plan::find($tenant->plan_id);
 
         $planChoosed = false;
@@ -47,13 +49,13 @@ class TenantSubscriptionController extends Controller
 
 
         if($plan != null)
-        {
-            $stripeSubscription = Subscription::where('user_id', auth()->user()->id)
-                ->where('type', $plan->product_id_on_stripe)
+            {
+                $stripeSubscription = Subscription::where('user_id', auth()->user()->id)
+                // ->where('type', $plan->product_id_on_stripe)
                 ->where('stripe_price', $plan->price_id_on_stripe)
                 ->where('stripe_status', '!=', 'canceled')
                 ->first();
-
+                
                 
                 if ($stripeSubscription) {
                     $planPaid = true;
@@ -61,13 +63,18 @@ class TenantSubscriptionController extends Controller
         }
 
 
+
+
         try {
             $plans = $this->planService->getAvailablePlans();
+            // dd($plan);
             return Inertia::render('Plans', [
                 'type' => $request->type,   /// tyes  select for first time , or change plan
                 'planChoosed' => $planChoosed,
+                'routeResourceName' => $this->routeResourceName,
                 'planPaid' => $planPaid,
-                'planId' => $plan->id ?? null,
+                'plan' => $plan ?? null,
+                'subscription' => $subscription ?? null,
                 'tenantId' => auth()->user()->tenants[0]?->id ?? null,
                 'plans' => $plans->map(function ($plan) {
                     return [
@@ -132,6 +139,8 @@ class TenantSubscriptionController extends Controller
         if ($stripeSubscription) {
             $oldPlan = Plan::where('price_id_on_stripe', $stripeSubscription->stripe_price)->first();
         }
+
+
 
         if ($oldPlan == $newPlan) {
         // if ($oldPlan == $newPlan) {

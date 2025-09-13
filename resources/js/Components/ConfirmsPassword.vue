@@ -5,6 +5,7 @@ import InputError from './InputError.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import SecondaryButton from './SecondaryButton.vue';
 import TextInput from './TextInput.vue';
+import Button from './Button.vue';
 
 const emit = defineEmits(['confirmed']);
 
@@ -15,11 +16,11 @@ defineProps({
     },
     content: {
         type: String,
-        default: 'For your security, please confirm your password to continue.',
+        default: 'For your security, please confirm your password to continue',
     },
     button: {
         type: String,
-        default: 'Confirm',
+        default: 'confirm',
     },
 });
 
@@ -33,7 +34,7 @@ const form = reactive({
 
 const passwordInput = ref(null);
 
-const startConfirmingPassword = () => {
+const startConfirmingPassword = () => { 
     axios.get(route('password.confirmation')).then(response => {
         if (response.data.confirmed) {
             emit('confirmed');
@@ -78,11 +79,12 @@ const closeModal = () => {
 
         <DialogModal :show="confirmingPassword" @close="closeModal">
             <template #title>
-                {{ title }}
+                {{ $t('general.' + title ) }}
             </template>
 
             <template #content>
-                {{ content }}
+                    <span class="text-gray-300 text-sm font-normal  border border-gray-200/20 rounded px-5 bg-black/30">
+                 {{ $t('general.' + content) }}</span>
 
                 <div class="mt-4">
                     <TextInput
@@ -90,29 +92,48 @@ const closeModal = () => {
                         v-model="form.password"
                         type="password"
                         class="mt-1 block w-3/4"
-                        placeholder="Password"
+                            :placeholder="`${$t('general.password')}`"
                         autocomplete="current-password"
                         @keyup.enter="confirmPassword"
                     />
 
                     <InputError :message="form.error" class="mt-2" />
                 </div>
-            </template>
 
-            <template #footer>
-                <SecondaryButton @click="closeModal">
-                    Cancel
-                </SecondaryButton>
 
-                <PrimaryButton
-                    class="ms-3"
+
+                                    <div class=" mt-8 flex justify-center gap-10 border-t border-gray-200/30 py-4 ">
+                        <Button class=" hover:cursor-pointer px-5 py-1" color="gradient_white" @click="closeModal">
+                            {{ $t("general.cancel") }}
+
+                        </Button>
+                        <Button  class=" hover:cursor-pointer px-5 py-1" color="gradient_red"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                     @click="confirmPassword"
                 >
-                    {{ button }}
-                </PrimaryButton>
+                        {{ $t('general.' + button) }}
+
+                        </Button>
+                    </div>
+
             </template>
+            
+            <!-- <template #footer>
+                <SecondaryButton @click="closeModal">
+                    {{ $t('general.cancel') }}
+                </SecondaryButton>
+    
+                <PrimaryButton
+                    class="ml-3"
+                    :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing"
+                    @click="confirmPassword"
+                >
+                        {{ $t('general.' + button) }}
+    
+                </PrimaryButton>
+            </template> -->
         </DialogModal>
     </span>
 </template>

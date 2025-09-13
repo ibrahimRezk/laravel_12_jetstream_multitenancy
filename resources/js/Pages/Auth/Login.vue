@@ -7,6 +7,10 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { computed } from "vue";
+import { trans } from "laravel-vue-i18n";
+
+
 
 defineProps({
     canResetPassword: Boolean,
@@ -27,6 +31,20 @@ const submit = () => {
         onFinish: () => form.reset('password'),
     });
 };
+
+
+
+
+const Email = computed(()=>{
+    return trans('auth.email')
+})
+const Password = computed(()=>{
+    return trans('auth.thePassword')
+})
+
+
+
+
 </script>
 
 <template>
@@ -43,7 +61,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" :value="Email" class=" text-white/80 "/>
                 <TextInput
                     id="email"
                     v-model="form.email"
@@ -53,11 +71,11 @@ const submit = () => {
                     autofocus
                     autocomplete="username"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <!-- <InputError class="mt-2" :message="form.errors.email" /> -->
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" :value="Password" class=" text-white/80 "/>
                 <TextInput
                     id="password"
                     v-model="form.password"
@@ -66,23 +84,35 @@ const submit = () => {
                     required
                     autocomplete="current-password"
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
+                <!-- <InputError class="mt-2" :message="form.errors.password" /> -->
             </div>
 
             <div class="block mt-4">
                 <label class="flex items-center">
                     <Checkbox v-model:checked="form.remember" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                    <span class="mx-2 text-sm text-gray-300 ">{{ $t('auth.remember')}}</span>
+                    <!-- <span class="mx-2 text-sm text-gray-600 dark:text-gray-400">{{ $t('auth.remember')}}</span> -->
+
                 </label>
             </div>
 
+                        <InputError v-if="$attrs?.errorBags?.default?.email[0]" class="mt-2" :message="`${$t('general.'+ $attrs?.errorBags?.default?.email[0])}`" />
+
+            <!-- <InputError class="mt-2" :message="form.errors.email" />
+            <InputError class="mt-2" :message="form.errors.password" /> -->
+
+
+
             <div class="flex items-center justify-end mt-4">
-                <Link v-if="canResetPassword" :href="route('password.request')" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                    Forgot your password?
+                <Link v-if="canResetPassword" :href="route('password.request')" class="underline text-sm text-gray-300 dark:text-gray-300 hover:text-gray-100 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                    <span class=" mx-3"> {{ $t('auth.forget_password') }}</span>
+
                 </Link>
 
                 <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
+                    <span class=" font-normal">
+                        {{ $t('auth.login') }}
+                    </span>
                 </PrimaryButton>
             </div>
         </form>

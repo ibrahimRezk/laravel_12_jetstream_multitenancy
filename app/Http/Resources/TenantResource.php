@@ -48,6 +48,7 @@ class TenantResource extends JsonResource
             'price' => $curerentSubscription->price ?? '',
             'ends_at' =>$curerentSubscription?->ends_at?->isoFormat('Do MMMM YYYY , h:mm a') ?? '',
             'trial_ends_at' =>  $curerentSubscription?->trial_ends_at?->isoFormat('Do MMMM YYYY , h:mm a') ?? '',
+            // 'trial_ends_at' =>  $curerentSubscription,
 ///////////////////////////////////////////////////////////////////////////
 
                    'created_at' => $this->when($this->created_at, function () {

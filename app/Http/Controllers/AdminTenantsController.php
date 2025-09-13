@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TenantSubscription;
+use App\Models\Plan;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Tenant;
-use App\Models\Plan;
 use Illuminate\Http\Request;
+use App\Services\PlanService;
 use Illuminate\Http\JsonResponse;
+use App\Models\TenantSubscription;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TenantRequest;
+use App\Http\Resources\PlanResource;
 use Illuminate\Support\Facades\Hash;
-use App\Services\PlanService;
 use App\Http\Resources\TenantResource;
 use App\Http\Requests\AddTenantRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-use App\Http\Resources\PlanResource;
 use App\Http\Resources\TenantSubscriptionResource;
 
 
@@ -34,10 +35,26 @@ class AdminTenantsController extends Controller
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $tenants = Tenant::with(['subscription', 'plan', 'subscriptions', 'owner:id,name,email', 'users:id,name,email'])
+            $tenants = Tenant::with([
+                'subscription',
+                'plan',
+                'subscriptions',
+                'owner:id,name,email',
+                'users:id,name,email'
+            ])
+                // ->when($request->name, fn(Builder $builder, $name) => $builder->where('name', 'like', "%{$name}%"))
+
+                ->whereHas(
+                'users', // to be changed to user only or owner
+                fn ($query) =>
+                $query->when($request->name, fn (Builder $builder, $name) => $builder->where('name', 'like', "%{$name}%")),
+            )
+
+
+
                 ->orderBy('id')
                 // ->get();
                 // ->paginate(1);
@@ -48,10 +65,61 @@ class AdminTenantsController extends Controller
 
 
             // dd($tenants[0]->currentSubscription() );
-            return Inertia::render('AllTenants', [
-                'tenants' => TenantResource::collection($tenants),
+            return Inertia::render('AllTenants/Index', [
+                'title' => 'all tenants',
+
+                'items' => TenantResource::collection($tenants),
                 'plans' => $plans,
+                'routeResourceName' => $this->routeResourceName,
+                'filters' => (object) $request->all(),
+                'method' => 'index', // used in composable filters
                 // 'type' => $plans 
+                'headers' => [
+                    [
+                        'label' => '#',
+                        'name' => '#',
+                    ],
+                    [
+                        'label' => 'name',
+                        'name' => 'name',
+                    ],
+                    [
+                        'label' => 'email',
+                        'name' => 'email',
+                    ],
+                    [
+                        'label' => 'status',
+                        'name' => 'status',
+                    ],
+                    [
+                        'label' => 'plan',
+                        'name' => 'plan',
+                    ],
+                    [
+                        'label' => 'interval',
+                        'name' => 'interval',
+                    ],
+                    [
+                        'label' => 'price',
+                        'name' => 'price',
+                    ],
+                    [
+                        'label' => 'created at',
+                        'name' => 'created at',
+                    ],
+                    [
+                        'label' => 'ends at',
+                        'name' => 'ends at',
+                    ],
+                    [
+                        'label' => 'trial ends at',
+                        'name' => 'trial ends at',
+                    ],
+                    [
+                        'label' => 'actions',
+                        'name' => 'actions',
+                    ],
+                ],
 
             ]);
 
@@ -227,54 +295,12 @@ class AdminTenantsController extends Controller
     //     }
     // }
 
-    /**
-     * Cancel tenant's subscription
-     */
-    public function cancelSubscription($tenantIds)
+
+    public function changeSubscription(TenantRequest $request, Tenant $id)
     {
-        try {
-            $all_ids = explode(',', $tenantIds);
 
-            foreach ($all_ids as $id) {
-                $tenant = Tenant::findOrFail($id);
-                $subscription = $this->planService->cancelSubscription($tenant);
-
-                if (!$subscription) {
-                    continue;
-                    // return response()->json([
-                    //     'success' => false,
-                    //     'message' => 'No active subscription found'
-                    // ], 404);
-                }
-            }
-            return redirect()->back()->with('success', 'canceled successfully');
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Subscription canceled successfully',
-            //     'subscription' => [
-            //         'id' => $subscription->id,
-            //         'status' => $subscription->status,
-            //         'canceled_at' => $subscription->updated_at
-            //     ]
-            // ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to cancel subscription: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Upgrade/downgrade tenant's subscription
-     */
-    public function changeSubscription(TenantRequest $request, $tenantId, Plan $plan)
-    {
-        // dd($plan->id);
-
-        $tenant = Tenant::findOrFail($tenantId);
-
-
+        $tenant = Tenant::findOrFail($request->id);
+        $plan = Plan::findOrFail($request->plan_id);
 
 
         try {
@@ -328,6 +354,37 @@ class AdminTenantsController extends Controller
             ], 500);
         }
     }
+
+
+    /**
+     * Cancel tenant's subscription
+     */
+
+    public function cancelSubscription($id)
+    {
+        try {
+
+            $tenant = Tenant::findOrFail($id);
+            $cancelSubscription = $this->planService->cancelSubscription($tenant);
+
+            return redirect()->back()->with('success', 'canceled successfully');
+            // return response()->json([
+            //     'success' => true,
+            //     'message' => 'Subscription canceled successfully',
+            //     'subscription' => [
+            //         'id' => $subscription->id,
+            //         'status' => $subscription->status,
+            //         'canceled_at' => $subscription->updated_at
+            //     ]
+            // ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel subscription: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 

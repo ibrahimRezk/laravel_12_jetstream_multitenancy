@@ -18,6 +18,9 @@ use Laravel\Cashier\Subscription;
 
 
 
+const PAGINATION_COUNT = 10;
+
+
 
 // routes/web.php, api.php or any other central route files you have
 
@@ -46,9 +49,22 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::get('/dashboard', function () {
 
                 if (auth()->user()->main_site_admin == true) {
-                    return Inertia::render('AdminDashboard' );
+                    return Inertia::render('AdminDashboard' , [
+                        'title' => 'dashboard',
+                        'routeResourceName' => 'dashboard',
+                        // 'breadcrumbs' => $breadcrumbs['breadcrumbs'],
+
+                    ]);
                 } else {
-                    return Inertia::render('TenantDashboard' , ['tenantSubscription' => auth()->user()->tenants[0]->currentSubscription()]);
+                            // $breadcrumbs = Breadcrumbs::render('dashboard');
+
+                    return Inertia::render('TenantDashboard' , [
+                        'tenantSubscription' => auth()->user()->tenants[0]->currentSubscription(),
+                        'title' => 'dashboard',
+                        'routeResourceName' => 'dashboard',
+                        // 'breadcrumbs' => $breadcrumbs['breadcrumbs'],
+
+                    ]);
                 }
             })->name('dashboard'); 
 
@@ -59,11 +75,12 @@ foreach (config('tenancy.central_domains') as $domain) {
 
             /////////////////////////////// admin part /////////////////////////////////////////////////////////////////////////////////////////////////
             // admin controle  Tenant subscriptions
-            Route::get('/admin/tenants', [AdminTenantsController::class, 'index'])->name('admin.tenants');
+            Route::get('/admin/tenants', [AdminTenantsController::class, 'index'])->name('admin.tenants.index');
             // Route::get('/admin/tenant/{tenantId}/subscription', [AdminTenantsController::class, 'getTenantSubscription'])->name('admin.getTenantSubscription');
-            Route::post('/admin/tenant/subscribe', [AdminTenantsController::class, 'subscribe'])->name('admin.tenant.subscribe');
-            Route::put('/admin/tenant/{tenantId}/subscription/{plan}', [AdminTenantsController::class, 'changeSubscription'])->name('admin.changeSubscription');
-            Route::delete('/admin/tenant/{tenantIds}/subscription', [AdminTenantsController::class, 'cancelSubscription'])->name('admin.cancelSubscription');
+            Route::post('/admin/tenant/subscribe', [AdminTenantsController::class, 'subscribe'])->name('admin.tenants.subscribe');
+            Route::put('/admin/tenant/{id}', [AdminTenantsController::class, 'changeSubscription'])->name('admin.tenants.changeSubscription');
+            // Route::put('/admin/tenant/{tenantId}/subscription/{plan}', [AdminTenantsController::class, 'changeSubscription'])->name('admin.changeSubscription');
+            Route::delete('/admin/tenant/{tenantIds}/subscription', [AdminTenantsController::class, 'cancelSubscription'])->name('admin.tenants.cancelSubscription');
 
 
 
@@ -106,8 +123,26 @@ foreach (config('tenancy.central_domains') as $domain) {
 }
 
 
+    //////////// to change lang /////////
+    Route::get('/change_lang/{locale}', function ($locale) {
+        App::setLocale($locale);
+        session()->put('lang', $locale);
+        // dd(session('lang'));
+        // dd( App::getLocale());
+        return redirect()->back();
+    })->name('lang');
+
+
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});
+
+
+
 /// remember this site does not work with laravel herd   it works well with xampp
 /// subsomains starts like this    http://ali.localhost:8000/login ;
 
 
 
+// check home.vue
+// check trial days here and on stripe.com

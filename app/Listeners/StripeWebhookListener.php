@@ -87,7 +87,7 @@ class StripeWebhookListener
         
         if ($user) {
             
-            $planService = new PlanService();
+            $planService = new PlanService(); 
             
             $plan_id = str_replace('"', '', $planFromStripe['id']); // important
             Log::info(" plan price is   :  {$plan_id}");
