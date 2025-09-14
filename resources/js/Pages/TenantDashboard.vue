@@ -94,7 +94,7 @@ const {
                     @click="fetchPlans('tenant')"
                     class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:cursor-pointer"
                 >
-                    choose a paln
+                    choose a plan
                     <span class="text-red-500"
                         >..........(only view if no subscription)</span
                     >
@@ -127,7 +127,7 @@ const {
                 <Link
                     v-show="props.tenantSubscription"
                     :href="
-                        route('tenant.plans', {
+                        route('tenant.plans.index', {
                             type: 'changePlan',
                         })
                     "

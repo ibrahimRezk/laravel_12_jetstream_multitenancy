@@ -6,7 +6,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Tenant;
 use App\Models\Plan;
-use App\Models\TenantSubscription;
+use App\Models\TenantSubscription; 
 use Illuminate\Support\Facades\DB;
 use App\Events\SubscriptionCreated;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +15,8 @@ use Laravel\Cashier\SubscriptionItem;
 
 class PlanService
 {
+
+    // check payment method for queries
     public function getAvailablePlans()
     {
         return Plan::where('is_active', true)
@@ -95,10 +97,11 @@ class PlanService
     }
 
 
+
+    
     public function handlePaymentSucceded(Tenant $tenant, Plan $plan) // this is for first time subscription and automatic renewal if payment is successful
     {
-
-        try {
+        try { 
             return DB::transaction(function () use ($tenant, $plan) {
 
     

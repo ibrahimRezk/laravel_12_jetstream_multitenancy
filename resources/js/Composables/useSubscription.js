@@ -30,7 +30,7 @@ export function useSubscription() {
             error.value = null;
 
             router.get(
-                route(`${site}.plans`),
+                route(`${site}.plans.index`),
                 {},
                 {
                     preserveScroll: true,

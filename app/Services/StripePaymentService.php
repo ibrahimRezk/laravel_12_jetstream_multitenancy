@@ -6,7 +6,7 @@ use App\Models\Tenant;
 use App\Models\Plan;
 use Illuminate\Support\Facades\Log;
 
-class PaymentService
+class StripePaymentService
 {
     public static function processRecurringPayment($newPlan, $changeSubscription)
     {
@@ -38,7 +38,7 @@ class PaymentService
             ->newSubscription($plan['product_id_on_stripe'], $plan['price_id_on_stripe'])
             // ->trialDays(5)
             // ->allowPromotionCodes()
-            ->checkout([
+            ->checkout([ 
                 'success_url' => route('dashboard'),
                 'cancel_url' => route('dashboard'),
             ]);
@@ -68,7 +68,7 @@ class PaymentService
 
         } catch (\Stripe\Exception\CardException $e) {
             // Payment failed - redirect to update payment method
-            return redirect()->route('payment.update')
+            return redirect()->route('tenant.payment.update')
                 ->with('error', 'Payment failed: ' . $e->getMessage())
                 ->with('pending_upgrade', $newPlan);
 

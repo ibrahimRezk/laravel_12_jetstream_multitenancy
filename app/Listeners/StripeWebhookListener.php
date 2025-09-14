@@ -9,6 +9,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Subscription;
 
+
+  // check payment method for queries///////////////////////
+    // for stripe : 
 class StripeWebhookListener
 {
     /**
@@ -73,7 +76,7 @@ class StripeWebhookListener
             // check in case of first time subscription
             $planService->updateTenantSubscription($tenant , $plan);
 
-            Log::info("Invoice subscription updated for user: {$user->email}");
+            Log::info("Invoice subscription updated for user: {$user->email}"); 
         }
     }
     protected function handleInvoicePaymentSucceded(array $payload)

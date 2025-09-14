@@ -17,13 +17,15 @@ import Input from "@/Components/Input.vue";
 import InputError from "@/Components/InputError.vue";
 import AddNew from "@/Components/AddNew.vue";
 
-
 const props = defineProps({
     plans: {
         type: Array,
         default: () => [],
     },
-        title: {
+    title: {
+        type: String,
+    },
+    method: {
         type: String,
     },
     popularPlan: {
@@ -116,11 +118,11 @@ const emptyErrors = () => {
     Object.keys(props.errors).forEach((error) => (props.errors[error] = ""));
 };
 
- const fireshowDialogModal = () => {
-     editMode.value = false;
-     emptyErrors();
-     showDialogModal();
- };
+const fireshowDialogModal = () => {
+    editMode.value = false;
+    emptyErrors();
+    showDialogModal();
+};
 
 const fireShowEditModal = (item) => {
     console.log("fireShowEditModal", item);
@@ -209,37 +211,29 @@ const formatFeature = (feature) => {
     <Head title="plans" />
 
     <Layout>
-                <template #breadcrumbs>
+        <template #breadcrumbs>
             <!-- <bread-crumbs :crumbs="breadcrumbs"></bread-crumbs> -->
         </template>
-              <template #header>
+        <template #header>
             {{ $t("general." + title) }}
         </template>
         <Container>
-
-                      <AddNew
-                :show="isFilled"
-                @reset="resetFilter"
-            >
-                <Button
-                    color="gradient_blue"
-                    @click="fireshowDialogModal"
-                >
+            <AddNew>
+                <Button color="gradient_blue" @click="fireshowDialogModal">
                     {{ $t("general.add new plan") }}
                 </Button>
-
             </AddNew>
 
-             
-
-                <div
-                    class=" mt-5 grid w-full  gap-5  lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 "
+            <div
+                class="mt-5 grid w-full gap-5 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+            >
+                <Card
+                    v-for="(plan, index) in plans"
+                    :key="plan.id"
+                    class="h-full grid"
                 >
-                    <Card v-for="(plan, index) in plans" :key="plan.id"
-                    class="  h-full grid   ">
-                    <div class=" grid grid-cols-1 w-full h-full  ">
-
-                        <div >
+                    <div class="grid grid-cols-1 w-full h-full">
+                        <div>
                             <div class="relative">
                                 <div
                                     class="absolute -top-6 left-1/2 transform -translate-x-1/2 mt-1"
@@ -255,7 +249,7 @@ const formatFeature = (feature) => {
                             </div>
                             <div>
                                 {{ plan.description }}
-                            </div> 
+                            </div>
                         </div>
                         <div class="flex flex-col h-full gap-5 justify-between">
                             <div class="grid gap-4">
@@ -298,8 +292,7 @@ const formatFeature = (feature) => {
                             <div>
                                 <div class="flex flex-col gap-2 w-full">
                                     <Button
-                                                                            color="transparent_green"
-
+                                        color="transparent_green"
                                         @click="fireShowEditModal(plan)"
                                         class="w-full hover:cursor-pointer"
                                     >
@@ -316,8 +309,8 @@ const formatFeature = (feature) => {
                             </div>
                         </div>
                     </div>
-                    </Card>
-                </div>
+                </Card>
+            </div>
         </Container>
 
         <!-- <AlertDialog v-model:open="deleteModal">
@@ -353,243 +346,246 @@ const formatFeature = (feature) => {
     <DialogModal :show="dialogModal" @close="closeDialogModal">
         <template #title> add new plan </template>
 
-                <template #content>
+        <template #content>
+            <div class="sm:max-w-[800px]">
+                <form @submit.prevent="submit">
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> name </Label>
+                                <Input
+                                    id="name"
+                                    v-model="form.name"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="name"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.name"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> description </Label>
+                                <Input
+                                    id="description"
+                                    v-model="form.description"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="description"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.description"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> product id on stripe </Label>
+                                <Input
+                                    id="product_id_on_stripe"
+                                    v-model="form.product_id_on_stripe"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="product_id_on_stripe"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="
+                                        props.errors?.product_id_on_stripe
+                                    "
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> price id on stripe </Label>
+                                <Input
+                                    id="price_id_on_stripe"
+                                    v-model="form.price_id_on_stripe"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="price_id_on_stripe"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.price_id_on_stripe"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> price </Label>
+                                <Input
+                                    id="price"
+                                    v-model="form.price"
+                                    type="number"
+                                    step="0.01"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="price"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.price"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> currency </Label>
+                                <Input
+                                    id="currency"
+                                    v-model="form.currency"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="currency"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.currency"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> interval </Label>
+                                <Input
+                                    id="interval"
+                                    v-model="form.interval"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="interval"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.interval"
+                                />
+                            </div>
+                            <div class="grid gap-2 mt-4">
+                                <Label for="name"> trial days </Label>
+                                <Input
+                                    id="trial_days"
+                                    v-model="form.trial_days"
+                                    type="number"
+                                    step="0.01"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="trial_days"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.trial_days"
+                                />
+                            </div>
+                        </div>
+                        <div class="border rounded border-gray-300/50 p-2">
+                            <div
+                                class="text-gray-300 font-bold border-b border-orange-200/20"
+                            >
+                                features
+                            </div>
 
-        <div class="sm:max-w-[800px]">
-            <form @submit.prevent="submit">
-               
-                <div class="grid grid-cols-2 gap-5">
-                    <div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> name </Label>
-                            <Input
-                                id="name"
-                                v-model="form.name"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="name"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.name"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> description </Label>
-                            <Input
-                                id="description"
-                                v-model="form.description"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="description"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.description"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> product id on stripe </Label>
-                            <Input
-                                id="product_id_on_stripe"
-                                v-model="form.product_id_on_stripe"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="product_id_on_stripe"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.product_id_on_stripe"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> price id on stripe </Label>
-                            <Input
-                                id="price_id_on_stripe"
-                                v-model="form.price_id_on_stripe"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="price_id_on_stripe"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.price_id_on_stripe"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> price </Label>
-                            <Input
-                                id="price"
-                                v-model="form.price"
-                                type="number"
-                                step="0.01"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="price"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.price"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> currency </Label>
-                            <Input
-                                id="currency"
-                                v-model="form.currency"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="currency"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.currency"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> interval </Label>
-                            <Input
-                                id="interval"
-                                v-model="form.interval"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="interval"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.interval"
-                            />
-                        </div>
-                        <div class="grid gap-2 mt-4">
-                            <Label for="name"> trial days </Label>
-                            <Input
-                                id="trial_days"
-                                v-model="form.trial_days"
-                                type="number"
-                                step="0.01"
-                                class="mt-1 block w-full"
-                                autofocus
-                                autocomplete="trial_days"
-                            />
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.trial_days"
-                            />
-                        </div>
-                    </div>
-                    <div class="border rounded border-gray-300/50 p-2">
-                        <div class=" text-gray-300 font-bold border-b border-orange-200/20">features</div>
-
-                        <div class="flex justify-center items-center">
-                            <ul class="  ">
-                                <li
-                                    v-for="(feature, index2) in form.features"
-                                    :key="index2"
-                                    class="flex justify-center items-center mt-3 gap-3"
-                                >
-                                    <div
-                                        class="flex w-full align-middle items-center gap-4"
+                            <div class="flex justify-center items-center">
+                                <ul class="  ">
+                                    <li
+                                        v-for="(
+                                            feature, index2
+                                        ) in form.features"
+                                        :key="index2"
+                                        class="flex justify-center items-center mt-3 gap-3"
                                     >
-                                        <div class="text-gray-300 border rounded-full px-1 text-xs">
-                                            {{ index2 + 1 }}
-                                        </div>
+                                        <div
+                                            class="flex w-full align-middle items-center gap-4"
+                                        >
+                                            <div
+                                                class="text-gray-300 border rounded-full px-1 text-xs"
+                                            >
+                                                {{ index2 + 1 }}
+                                            </div>
 
-                                        <Input
-                                            id="name"
-                                            v-model="form.features[index2]"
-                                            type="text"
-                                            class="mt-1 block w-full"
-                                            autofocus
-                                            autocomplete="name"
-                                        />
+                                            <Input
+                                                id="name"
+                                                v-model="form.features[index2]"
+                                                type="text"
+                                                class="mt-1 block w-full"
+                                                autofocus
+                                                autocomplete="name"
+                                            />
 
-                                        <!-- <Button small color="gradient_white">
+                                            <!-- <Button small color="gradient_white">
                                                              {{ formatFeature(feature) }}
                                                          </Button> -->
-                                    </div>
+                                        </div>
 
-                                    <!-- <InputGroup
+                                        <!-- <InputGroup
                                  nolabel
                                  class="px-8 col-span-6 w-full"
                                  v-model="form.features[index2]"
                                  :message="props.errors?.features"
                              /> -->
 
-                                    <div>
+                                        <div>
+                                            <Button
+                                                @click="removeFeature(index2)"
+                                                medium
+                                                color="gradient_red"
+                                                class="mt- hover:cursor-pointer mx-1 px-4 hover:scale-110 curser-pointer"
+                                            >
+                                                {{ "-" }}
+                                            </Button>
+                                        </div>
+
+                                        <InputError
+                                            class="mt-2"
+                                            :message="
+                                                props.errors[
+                                                    'features.' + index2
+                                                ]
+                                            "
+                                        />
+                                    </li>
+                                    <div class="mt-3 flex justify-center">
                                         <Button
-                                            @click="removeFeature(index2)"
+                                            @click="addNewFeature"
                                             medium
-                                            color="gradient_red"
-                                            class="mt- hover:cursor-pointer mx-1 px-4 hover:scale-110 curser-pointer"
+                                            color="gradient_blue"
+                                            class="hover:cursor-pointer mx-1 px-4 hover:scale-110 curser-pointer"
                                         >
-                                            {{ "-" }}
+                                            {{ "+" }}
                                         </Button>
                                     </div>
-
-                                    <InputError
-                                        class="mt-2"
-                                        :message="
-                                            props.errors['features.' + index2]
-                                        "
-                                    />
-                                </li>
-                                <div class="mt-3 flex justify-center">
-                                    <Button
-                                        @click="addNewFeature"
-                                        medium
-                                        color="gradient_blue"
-                                        class="hover:cursor-pointer mx-1 px-4 hover:scale-110 curser-pointer"
-                                    >
-                                        {{ "+" }}
-                                    </Button>
-                                </div>
-                            </ul>
-                            <InputError
-                                class="mt-2"
-                                :message="props.errors?.features"
-                            />
+                                </ul>
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.features"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="gap-2 mt-8">
-                    <Button
-                        @click="addNewOrEdit"
-                        class="hover:cursor-pointer"
-                        type="submit"
-                        :disabled="form.processing"
-                    >
-                        confirm
-                    </Button>
-                </div>
-            </form>
-        </div>
+                    <div class="gap-2 mt-8">
+                        <Button
+                            @click="addNewOrEdit"
+                            class="hover:cursor-pointer"
+                            type="submit"
+                            :disabled="form.processing"
+                        >
+                            confirm
+                        </Button>
+                    </div>
+                </form>
+            </div>
         </template>
     </DialogModal>
 
-
-    
     <Modal :show="deleteModal" @close="close">
         <template #title>
             <span class="text-red-800">{{ $t("general.delete plan") }} : </span>
-            {{
-                 itemToDelete[0].name
-            }}
+            {{ itemToDelete[0].name }}
         </template>
         <template #content>
             {{ $t("general.confirmation") }}
         </template>
         <template #footer>
-            <Button
-                @click="handleDeleteItem"
-                color="red"
-            >
-                <span >{{ $t("general.confirm") }}</span>
+            <Button @click="handleDeleteItem" color="red">
+                <span>{{ $t("general.confirm") }}</span>
             </Button>
         </template>
     </Modal>

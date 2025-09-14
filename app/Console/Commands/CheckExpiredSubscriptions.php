@@ -7,7 +7,7 @@ use App\Models\TenantSubscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-class CheckExpiredSubscriptions extends Command
+class CheckExpiredSubscriptions extends Command 
 {
     
     /**

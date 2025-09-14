@@ -154,7 +154,7 @@ const addNewOrEdit = () => {
 
 const editSubscription = () => {
     editMode.value == true;
-    method.value = "changeSubscription";
+    method.value = "update";
     routeResourceName.value = `${props.routeResourceName}`;
     return handleSavingItem();
 };
@@ -162,7 +162,7 @@ const editSubscription = () => {
 const addNewSubscription = () => {
     // console.log(props.routeResourceName)
     editMode.value == false;
-    method.value = "subscribe";
+    method.value = "store";
     routeResourceName.value = `${props.routeResourceName}`;
     return handleSavingItem();
 };
@@ -371,7 +371,6 @@ const startLeaveAnimation = () => {
                                     <div class="flex justify-between">
                                         <div>
                                             <h1 class="text-gray-200">
-                                                <h1 class="text-gray-200">
                                                     {{
                                                         $t(
                                                             "general." +
@@ -379,7 +378,6 @@ const startLeaveAnimation = () => {
                                                         )
                                                     }}
                                                 </h1>
-                                            </h1>
                                         </div>
                                         <div>
                                             <input

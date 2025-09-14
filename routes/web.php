@@ -26,8 +26,6 @@ const PAGINATION_COUNT = 10;
 
 foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->group(function () {
-        // your actual routes
-        // dd('here');
         Route::get('/', function () {
             return Inertia::render('Welcome', [
                 'canLogin' => Route::has('login'),
@@ -47,26 +45,22 @@ foreach (config('tenancy.central_domains') as $domain) {
 
             // Route::get('/dashboard', DashboardController::class)->name('dashboard')->middleware(CheckMainSiteAdminMiddleware::class);
             Route::get('/dashboard', function () {
-
                 if (auth()->user()->main_site_admin == true) {
-                    return Inertia::render('AdminDashboard' , [
+                    return Inertia::render('AdminDashboard', [
                         'title' => 'dashboard',
                         'routeResourceName' => 'dashboard',
                         // 'breadcrumbs' => $breadcrumbs['breadcrumbs'],
-
                     ]);
                 } else {
-                            // $breadcrumbs = Breadcrumbs::render('dashboard');
-
-                    return Inertia::render('TenantDashboard' , [
+                    // $breadcrumbs = Breadcrumbs::render('dashboard');
+                    return Inertia::render('TenantDashboard', [
                         'tenantSubscription' => auth()->user()->tenants[0]->currentSubscription(),
                         'title' => 'dashboard',
                         'routeResourceName' => 'dashboard',
                         // 'breadcrumbs' => $breadcrumbs['breadcrumbs'],
-
                     ]);
                 }
-            })->name('dashboard'); 
+            })->name('dashboard');
 
 
 
@@ -74,46 +68,55 @@ foreach (config('tenancy.central_domains') as $domain) {
 
 
             /////////////////////////////// admin part /////////////////////////////////////////////////////////////////////////////////////////////////
-            // admin controle  Tenant subscriptions
-            Route::get('/admin/tenants', [AdminTenantsController::class, 'index'])->name('admin.tenants.index');
-            // Route::get('/admin/tenant/{tenantId}/subscription', [AdminTenantsController::class, 'getTenantSubscription'])->name('admin.getTenantSubscription');
-            Route::post('/admin/tenant/subscribe', [AdminTenantsController::class, 'subscribe'])->name('admin.tenants.subscribe');
-            Route::put('/admin/tenant/{id}', [AdminTenantsController::class, 'changeSubscription'])->name('admin.tenants.changeSubscription');
-            // Route::put('/admin/tenant/{tenantId}/subscription/{plan}', [AdminTenantsController::class, 'changeSubscription'])->name('admin.changeSubscription');
-            Route::delete('/admin/tenant/{tenantIds}/subscription', [AdminTenantsController::class, 'cancelSubscription'])->name('admin.tenants.cancelSubscription');
+            // admin  Tenants and subscriptions controller
+            Route::name('admin.')->group(function () {
+                Route::delete('/tenant/{tenantIds}/subscription', [AdminTenantsController::class, 'cancelSubscription'])->name('tenants.cancelSubscription');
+                Route::resource('tenants', AdminTenantsController::class);
 
-
-
-            Route::get('/admin/purchase-plans', [AdminPlanController::class, 'index'])->name('admin.plans');
-            Route::post('/admin/store-purchase-plans', [AdminPlanController::class, 'store'])->name('admin.plans.store');
-            Route::put('/admin/update-purchase-plans/{plan}', [AdminPlanController::class, 'update'])->name('admin.plans.update');
-            Route::delete('/admin/delete-purchase-plans/{plan}', [AdminPlanController::class, 'destroy'])->name('admin.plans.destroy');
+                // admin plan controler
+                Route::resource('plans', AdminPlanController::class);
+            });
             ///////////////////////////////end of admin part /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-            /////////////////////////////// tenant part  for tenants on the main site   .... add middleware to let only tenant owner to access here /////////////////////////////////////////
 
 
 
-            Route::get('/tenant/purchase-plans', [TenantSubscriptionController::class, 'plans'])->name('tenant.plans');
-            Route::get('addUser', [TenantSubscriptionController::class, 'addUser'])->name('tenant.addUser');/// temporarly for testing     tobe deleted
 
-            Route::get('/tenant/checkout', [TenantSubscriptionController::class, 'checkout'])->name('tenant.checkout');
-            Route::get('/tenant/subscription', [TenantSubscriptionController::class, 'getTenantSubscription'])->name('tenant.getTenantSubscription');
-            Route::get('tenantSubscriptionDetails', [TenantSubscriptionController::class, 'tenantSubscriptionDetails'])->name('tenantSubscriptionDetails');
-            Route::put('/tenant/subscription/{plan}/{tenant}', [TenantSubscriptionController::class, 'changeSubscription'])->name('tenant.changeSubscription'); // check this .. no need for it
-            Route::delete('/tenant/cancel_subscription', [TenantSubscriptionController::class, 'cancelSubscription'])->name('tenant.cancelSubscription');
-            Route::get('/payment/update', [TenantSubscriptionController::class, 'updatePaymentMethod'])->name('payment.update'); // for cashier stripe
+            ///////////////////// tenant part  for tenants on the main site   .... add middleware to let only tenant owner to access here /////////////////
 
-            Route::get('/subscription/retry-upgrade', [TenantSubscriptionController::class, 'retryUpgrade'])->name('subscription.retry-upgrade'); // for cashier stripe
+            Route::name('tenant.')->group(function () {
+                Route::get('addUser', [TenantSubscriptionController::class, 'addUser'])->name('addUser');/// temporarly for testing     tobe deleted
+
+                Route::get('/tenant/purchase-plans', [TenantSubscriptionController::class, 'plans'])->name('plans.index');
+                Route::get('/tenant/checkout', [TenantSubscriptionController::class, 'checkout'])->name('checkout');
+                Route::get('/tenant/subscription', [TenantSubscriptionController::class, 'getTenantSubscription'])->name('getTenantSubscription');
+                
+
+                Route::delete('/tenant/cancel_subscription', [TenantSubscriptionController::class, 'cancelSubscription'])->name('cancelSubscription');
+                Route::get('/payment/update', [TenantSubscriptionController::class, 'updatePaymentMethod'])->name('payment.update'); // for cashier stripe
+                Route::get('/subscription/retry-upgrade', [TenantSubscriptionController::class, 'retryUpgrade'])->name('subscription.retry-upgrade'); // for cashier stripe
+
+
+                // Feature-specific routes
+                Route::get('/advanced-features', function () {
+                    return view('tenant.advanced');
+                })->middleware('check.subscription:advanced_features')->name('advanced');
 
 
 
-            // Feature-specific routes
-            Route::get('/advanced-features', function () {
-                return view('tenant.advanced');
-            })->middleware('check.subscription:advanced_features')->name('tenant.advanced');
+
+
+                // check if this is used any way
+                // Route::get('tenantSubscriptionDetails', [TenantSubscriptionController::class, 'tenantSubscriptionDetails'])->name('tenantSubscriptionDetails');
+
+
+
+            });
+
+
+
 
         });
         /////////////////////////////// end of tenant part ///////////////////////////////////////////////////////////////////////////////////////////
@@ -123,14 +126,14 @@ foreach (config('tenancy.central_domains') as $domain) {
 }
 
 
-    //////////// to change lang /////////
-    Route::get('/change_lang/{locale}', function ($locale) {
-        App::setLocale($locale);
-        session()->put('lang', $locale);
-        // dd(session('lang'));
-        // dd( App::getLocale());
-        return redirect()->back();
-    })->name('lang');
+//////////// to change lang /////////
+Route::get('/change_lang/{locale}', function ($locale) {
+    App::setLocale($locale);
+    session()->put('lang', $locale);
+    // dd(session('lang'));
+    // dd( App::getLocale());
+    return redirect()->back();
+})->name('lang');
 
 
 Route::fallback(function () {
@@ -146,3 +149,9 @@ Route::fallback(function () {
 
 // check home.vue
 // check trial days here and on stripe.com
+
+// before delete plan  first check if there is any active subscription to this plan
+
+
+
+// search for =>  check payment method for queries   <=  to make queries depends on payment method

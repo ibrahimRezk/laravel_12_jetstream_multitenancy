@@ -42,6 +42,7 @@ class AdminPlanController extends Controller
             $popularPlan = $this->planService->getPopularPlan();
             return Inertia::render('AdminControlPlans', [
                 'title' => 'plans',
+                'method' => 'index',
                 'tenants' => auth()->user()->tenants, //added only to the admin  because if the tenant choose a plan we already know his id by tenant('id)
                 'popularPlan' => $popularPlan ? [
                     'id' => $popularPlan->plan_id,
@@ -126,13 +127,12 @@ class AdminPlanController extends Controller
         return back()->with('success', 'Plan updated successfully.');
         // $feature = str_replace(' ', '_', $feature);
     }
-
-
     public function destroy($ids)
     {
         $all_ids = explode(',', $ids);
 
         foreach ($all_ids as $id) {
+            // first check if there is any active subscription to this plan
             $plan = Plan::find($id);
 
             $plan->delete();

@@ -4,7 +4,7 @@ namespace App\Services;
 class PaymentResult
 {
     private $successful;
-    private $paymentId;
+    private $paymentId; 
     private $errorMessage;
 
     public function __construct($successful, $paymentId = null, $errorMessage = null)

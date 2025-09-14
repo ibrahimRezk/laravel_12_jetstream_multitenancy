@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use App\Services\PlanService;
-use App\Services\PaymentService;
+use App\Services\StripePaymentService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TenantSubscriptionResource;
@@ -30,11 +30,11 @@ class TenantSubscriptionController extends Controller
     }
 
 
-        public function plans(Request $request)
+    public function plans(Request $request)
     {
         $tenant = auth()->user()->tenants()->first();
 
-        $subscription = $tenant->subscription()->latest('updated_at')->first();
+        $subscription = $tenant->subscription()->latest()->first();
 
         $plan = Plan::find($tenant->plan_id);
 
@@ -47,19 +47,19 @@ class TenantSubscriptionController extends Controller
             $planChoosed = true;
         }
 
-
-        if($plan != null)
-            {
-                $stripeSubscription = Subscription::where('user_id', auth()->user()->id)
+        if ($plan != null) {
+            //////////// check payment method for queries  //////////////////////////////
+            ////////// if payment method is stripe//////////
+            $stripeSubscription = Subscription::where('user_id', auth()->user()->id)
                 // ->where('type', $plan->product_id_on_stripe)
                 ->where('stripe_price', $plan->price_id_on_stripe)
                 ->where('stripe_status', '!=', 'canceled')
                 ->first();
-                
-                
-                if ($stripeSubscription) {
-                    $planPaid = true;
-                }
+
+
+            if ($stripeSubscription) {
+                $planPaid = true;
+            }
         }
 
 
@@ -121,15 +121,16 @@ class TenantSubscriptionController extends Controller
 
     public function checkout(Request $request)
     {
-
         $tenant = auth()->user()->tenants[0];
 
         if (!$tenant) {
             return back()->with('error', 'Tenant not found');
         }
 
-        // CHECK if the tenant has active subscription on stripe   "subscriptions" table     and here   "tenant_subscriptions" table
 
+        //////////////////////////////// check payment method for queries ////////////////////////////////////////
+
+        // CHECK if the tenant has active subscription on stripe   "subscriptions" table     and here   "tenant_subscriptions" table
         //// stripe subscription 
         $stripeSubscription = Subscription::where('user_id', auth()->user()->id)->where('stripe_status', 'active')->first(); /// check active it may be another status like past_due فات موعد استحقاقها
 
@@ -140,10 +141,8 @@ class TenantSubscriptionController extends Controller
             $oldPlan = Plan::where('price_id_on_stripe', $stripeSubscription->stripe_price)->first();
         }
 
-
-
         if ($oldPlan == $newPlan) {
-        // if ($oldPlan == $newPlan) {
+            // if ($oldPlan == $newPlan) {
             return back()->with('error', 'Tenant already has an active subscription');
         }
 
@@ -155,9 +154,9 @@ class TenantSubscriptionController extends Controller
 
         try {
 
-
-            return PaymentService::processRecurringPayment($newPlan, $changeSubscription);
+            return StripePaymentService::processRecurringPayment($newPlan, $changeSubscription);
             // after payment success there is webhook event comes from stripe  and stripewebhook listener  and in case of success it will complete subscription in the listener
+            //////////// end         //// check payment method for queries ////////////////////////////////////////
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -174,42 +173,6 @@ class TenantSubscriptionController extends Controller
     }
 
 
-    // Route to update payment method
-    public function updatePaymentMethod()
-    {
-        $user = auth()->user();
-
-        // Store the pending upgrade in session
-        $pendingUpgrade = session('pending_upgrade');
-        $returnUrl = $pendingUpgrade
-            ? route('subscription.retry-upgrade')
-            : route('dashboard');
-
-        return $user->redirectToBillingPortal($returnUrl);
-    }
-
-    // Retry the upgrade after payment method update
-    public function retryUpgrade()
-    {
-        $pendingUpgrade = session('pending_upgrade');
-
-        if (!$pendingUpgrade) {
-            return redirect()->route('dashboard')
-                ->with('error', 'No pending upgrade found.');
-        }
-
-        // Clear the session and retry
-        session()->forget('pending_upgrade');
-
-        return PaymentService::processRecurringPayment($pendingUpgrade, true);
-
-        // return $this->changePlan(new Request(['price_id' => $pendingUpgrade]));
-    }
-
-
-    /**
-     * Get tenant's current subscription
-     */
     public function getTenantSubscription(Request $request)
     {
         try {
@@ -228,7 +191,6 @@ class TenantSubscriptionController extends Controller
 
 
             $subscription = new TenantSubscriptionResource($subscription);
-
             if (!$subscription) {
                 return response()->json([
                     'success' => true,
@@ -252,60 +214,40 @@ class TenantSubscriptionController extends Controller
     }
 
 
-    public function tenantSubscriptionDetails()
+    // Route to update payment method
+    public function updatePaymentMethod()
     {
-        return Tenant::findOrFail(auth()->user()->tenants[0]?->id)?->subscription;
+        $user = auth()->user();
+
+        // check payment method for queries
+        // Store the pending upgrade in session
+        $pendingUpgrade = session('pending_upgrade');
+        $returnUrl = $pendingUpgrade
+            ? route('tenant.subscription.retry-upgrade')
+            : route('dashboard');
+
+        return $user->redirectToBillingPortal($returnUrl);
     }
 
 
-    /**
-     * Upgrade/downgrade tenant's subscription
-     */
-    public function changeSubscription(Request $request, Plan $plan)
+
+    // Retry the upgrade after payment method update
+    public function retryUpgrade()
     {
-        $tenant = auth()->user()->tenants[0];
-        if (!$tenant) {
-            return back()->with('error', 'Tenant not found');
+        $pendingUpgrade = session('pending_upgrade');
+
+        if (!$pendingUpgrade) {
+            return redirect()->route('dashboard')
+                ->with('error', 'No pending upgrade found.');
         }
-        // $tenant = Tenant::findOrFail(tenant('id'));
-        // Cancel existing subscription
-        try {
-            // swap  subscription
-            $subscription = $this->planService->subscribeTenant($tenant, $plan);
 
-            return to_route('dashboard')->with('success', 'changed successfully');
+        // Clear the session and retry
+        session()->forget('pending_upgrade');
 
+        // check payment method for queries
+        return StripePaymentService::processRecurringPayment($pendingUpgrade, true);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to change subscription: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    public function changeSubscriptionOld(Request $request, Plan $plan)
-    {
-        $tenant = auth()->user()->tenants[0];
-        if (!$tenant) {
-            return back()->with('error', 'Tenant not found');
-        }
-        // $tenant = Tenant::findOrFail(tenant('id'));
-        // Cancel existing subscription
-        try {
-            $this->planService->cancelSubscription($tenant);
-
-            // Create new subscription
-            $subscription = $this->planService->subscribeTenant($tenant, $plan);
-
-            return to_route('dashboard')->with('success', 'changed successfully');
-
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to change subscription: ' . $e->getMessage()
-            ], 500);
-        }
+        // return $this->changePlan(new Request(['price_id' => $pendingUpgrade]));
     }
 
     /**
@@ -344,36 +286,20 @@ class TenantSubscriptionController extends Controller
         }
     }
 
-
     /**
-     * Get all tenants
+     * Get tenant's current subscription
      */
-    // public function getTenants()
-    // {
-    //     try {
-    //         $tenants = Tenant::select('id', 'name')
-    //             ->orderBy('name')
-    //             ->get();
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'tenants' => $tenants->map(function ($tenant) {
-    //                 return [
-    //                     'id' => $tenant->id,
-    //                     'name' => $tenant->name ?? $tenant->id
-    //                 ];
-    //             })
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to fetch tenants: ' . $e->getMessage()
-    //         ], 500);
-    //     }
+
+    // public function tenantSubscriptionDetails()
+    // {
+    //     return Tenant::findOrFail(auth()->user()->tenants[0]?->id)?->subscription;
     // }
 
-    /**
-     * Ssubscribe tenant to a plan
-     */
+
+
+
+
+
 
 }
