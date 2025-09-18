@@ -53,8 +53,10 @@ const editMode = ref(false);
 const form = useForm({
     name: "",
     description: "",
-    product_id_on_stripe: "",
-    price_id_on_stripe: "",
+    // product_id_on_stripe: "",
+    // price_id_on_stripe: "",
+    // paypal_product_id: "",
+    // paypal_plan_id: "",
     price: "",
     currency: "",
     interval: "",
@@ -381,7 +383,7 @@ const formatFeature = (feature) => {
                                     :message="props.errors?.description"
                                 />
                             </div>
-                            <div class="grid gap-2 mt-4">
+                            <!-- <div class="grid gap-2 mt-4">
                                 <Label for="name"> product id on stripe </Label>
                                 <Input
                                     id="product_id_on_stripe"
@@ -397,8 +399,8 @@ const formatFeature = (feature) => {
                                         props.errors?.product_id_on_stripe
                                     "
                                 />
-                            </div>
-                            <div class="grid gap-2 mt-4">
+                            </div> -->
+                            <!-- <div class="grid gap-2 mt-4">
                                 <Label for="name"> price id on stripe </Label>
                                 <Input
                                     id="price_id_on_stripe"
@@ -412,7 +414,37 @@ const formatFeature = (feature) => {
                                     class="mt-2"
                                     :message="props.errors?.price_id_on_stripe"
                                 />
-                            </div>
+                            </div> -->
+                            <!-- <div class="grid gap-2 mt-4">
+                                <Label for="name"> paypal_product_id </Label>
+                                <Input
+                                    id="paypal_product_id"
+                                    v-model="form.paypal_product_id"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="paypal_product_id"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.paypal_product_id"
+                                />
+                            </div> -->
+                            <!-- <div class="grid gap-2 mt-4">
+                                <Label for="name"> paypal_plan_id </Label>
+                                <Input
+                                    id="paypal_plan_id"
+                                    v-model="form.paypal_plan_id"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    autofocus
+                                    autocomplete="paypal_plan_id"
+                                />
+                                <InputError
+                                    class="mt-2"
+                                    :message="props.errors?.paypal_plan_id"
+                                />
+                            </div> -->
                             <div class="grid gap-2 mt-4">
                                 <Label for="name"> price </Label>
                                 <Input

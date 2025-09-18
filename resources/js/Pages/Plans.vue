@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { router, useForm, usePage } from "@inertiajs/vue3";
+import { Link, router, useForm, usePage } from "@inertiajs/vue3";
 import { useSubscription } from "@/Composables/useSubscription";
 import Layout from "@/Layouts/Authenticated.vue";
 import Container from "@/Components/Container.vue";
@@ -66,6 +66,7 @@ const activeForm = ref("");
 const showScreenExeptSubmenu = ref(false);
 const routeResourceName = ref(props.routeResourceName);
 const editMode = ref(false);
+const pay_with = ref('');
 
 const selectedPlan = ref(null);
 const changePlan = ref(false);
@@ -116,6 +117,15 @@ onMounted(() =>
 const formatPrice = (price) => {
     return parseFloat(price).toFixed(2);
 };
+
+const gotoPaypalPayment = ()=>{
+    
+    console.log('here')
+    router.get(route('tenant.checkout', {
+                            plan_id: selectedPlan.id,
+                            pay_with: pay_with
+                        }))
+}
 
 const formatFeature = (feature) => {
     return feature
@@ -222,14 +232,14 @@ const formatFeature = (feature) => {
                                                 choose
                                             </Button>
                                             <Button
-                                                v-else     
-                                                disabled                                          
+                                                v-else
+                                                disabled
                                                 class="w-full"
                                                 color="transparent_green"
                                             >
                                                 your plan :
-                                                <br/>
-                                               {{ props.subscription?.status }}
+                                                <br />
+                                                {{ props.subscription?.status }}
                                             </Button>
                                         </div>
 
@@ -309,12 +319,34 @@ const formatFeature = (feature) => {
                     </button> -->
                 <!-- </form> -->
 
+                <p class="mt-5">Choose your payment method:</p>
+                <input
+                    type="radio"
+                    id="paypal"
+                    value="paypal"
+                    v-model="pay_with"
+                    name="pay_with"
+                />
+
+                <label for="paypal">Paypal</label><br />
+
+                <input
+                    type="radio"
+                    id="stripe"
+                    value="stripe"
+                    v-model="pay_with"
+                    name="pay_with"
+                />
+                <label for="stripe">Stripe</label><br />
+
+
                 <a
                     as="a"
-                    class="mb-2 px-12 py-1 mt-5 rounded-full text-white bg-gradient-to-l border-orange-100 duration-300 capitalize tracking-wider shadow-black drop-shadow-2xl shadow-2xl border text-sm ease-in-out hover:scale-110 from-orange-800 to-orange-500 hover:from-orange-900 hover:to-orange-500"
+                    class="mb-2 px-12 py-1 rounded-full text-white bg-gradient-to-l border-orange-100 duration-300 capitalize tracking-wider shadow-black drop-shadow-2xl shadow-2xl border text-sm ease-in-out hover:scale-110 from-orange-800 to-orange-500 hover:from-orange-900 hover:to-orange-500"
                     :href="
                         route('tenant.checkout', {
                             plan_id: selectedPlan.id,
+                            pay_with: pay_with
                         })
                     "
                 >

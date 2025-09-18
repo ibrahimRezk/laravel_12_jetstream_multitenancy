@@ -19,6 +19,7 @@ class StripeWebhookListener
      */
     public function handle(WebhookReceived $event): void
     {
+        Log::info('start stripe listener ' );
         $payload = $event->payload;
 
         match ($payload['type']) {

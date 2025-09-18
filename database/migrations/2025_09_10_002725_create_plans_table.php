@@ -17,12 +17,20 @@ return new class extends Migration {
             $table->decimal('price', 10, 2);
             $table->string('currency', 3)->default('USD');
             $table->string('interval')->default('monthly'); // monthly, yearly
+
             $table->string('price_id_on_stripe')->nullable();
             $table->string('product_id_on_stripe')->nullable();
+
+            $table->string('paypal_product_id')->nullable();  // new
+            $table->string('paypal_plan_id')->nullable();  // new
+
             $table->json('features')->nullable();
             $table->boolean('is_active')->default(true);
             $table->integer('trial_days')->default(0);
             $table->integer('sort_order')->default(0);
+
+
+
             $table->timestamps();
         });
     }

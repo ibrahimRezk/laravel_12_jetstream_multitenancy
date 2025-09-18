@@ -22,6 +22,7 @@ return [
         'laravel_12_jetstream_multitenancy.test',
         // '127.0.0.1',
         // 'localhost',
+        // 'https://atb0p1vxj.localto.net',
     ],
 
     /**

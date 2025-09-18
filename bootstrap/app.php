@@ -23,6 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
 
+
+        $middleware->validateCsrfTokens(except: [ // new 
+        'stripe/*',
+        'paypal/webhook',
+    ]);
+
         //
     })
 
@@ -30,10 +36,21 @@ return Application::configure(basePath: dirname(__DIR__))
         // new schadule added for the expired subscriptions command
     ->withSchedule(function (Schedule $schedule) {
         // Check for expired subscriptions every hour
-        $schedule->command('subscriptions:check-expired')
-        // ->everyFifteenSeconds()
-            ->hourly()
+        $schedule->command('subscriptions:check-expired') // for stripe
+        ->everyFifteenSeconds()
+            // ->hourly()
             ->withoutOverlapping();
+
+
+
+
+        $schedule->command('subscriptions:check-status') // for paypal
+        ->everyFifteenSeconds()
+            // ->hourly()
+            ->withoutOverlapping();
+
+
+
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

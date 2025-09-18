@@ -10,21 +10,23 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "cocur/slugify": "^4.4",
+        "codezero/laravel-unique-translation": "^4.3",
+        "diglactic/laravel-breadcrumbs": "^10.00",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/cashier": "^15.7",
         "laravel/framework": "^12.0",
         "laravel/jetstream": "^5.3",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "stancl/tenancy": "^3.9",
-        "tightenco/ziggy": "^2.0",
-
-        "cocur/slugify": "^4.4",
-        "codezero/laravel-unique-translation": "^4.3",
-        "diglactic/laravel-breadcrumbs": "^10.00",
+        "paypal/paypal-server-sdk": "^1.1",
+        "paypal/rest-api-sdk-php": "*",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.12",
-        "spatie/laravel-translatable": "^6.10"
+        "spatie/laravel-translatable": "^6.10",
+        "srmklive/paypal": "^3.0",
+        "stancl/tenancy": "^3.9",
+        "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -47,7 +49,9 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },"files" : [
-            "app/Http/Helpers/General.php"
+            "app/Http/Helpers/General.php", 
+            "app/Http/Helpers/SubscriptionHelper.php"
+
         ]
     },
     "autoload-dev": {

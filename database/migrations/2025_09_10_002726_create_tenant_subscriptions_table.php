@@ -16,9 +16,19 @@ return new class extends Migration {
             $table->decimal('price', 12, 2)->default(0);
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('plan_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['active', 'inactive', 'canceled', 'expired'])->default('active');
+            $table->enum('status', ['pending' ,'active', 'inactive', 'canceled', 'expired'])->default('pending');
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('ends_at')->nullable();
+
+
+            // $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('subscription_plan_id')->constrained();
+            $table->string('paypal_subscription_id')->nullable();  // new
+            $table->timestamp('starts_at')->nullable();  // new
+            $table->timestamp('cancelled_at')->nullable();  // new
+            $table->json('paypal_data')->nullable(); // Store PayPal response data  // new
+
+
             $table->timestamps();
         });
     }

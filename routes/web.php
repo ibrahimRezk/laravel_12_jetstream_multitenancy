@@ -1,20 +1,21 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\WebhookController;
 use App\Models\User;
 use Inertia\Inertia;
+use Laravel\Cashier\Subscription;
 use App\Models\TenantSubscription;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\AdminPlanController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminTenantsController;
-use App\Http\Controllers\TenantSubscriptionController;
+use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\AdminSubscriptionController;
 use App\Http\Middleware\CheckMainSiteAdminMiddleware;
-use Laravel\Cashier\Subscription;
+use App\Http\Controllers\TenantSubscriptionController;
 
 
 
@@ -69,7 +70,7 @@ foreach (config('tenancy.central_domains') as $domain) {
 
             /////////////////////////////// admin part /////////////////////////////////////////////////////////////////////////////////////////////////
             // admin  Tenants and subscriptions controller
-            Route::name('admin.')->group(function () {
+            Route::middleware(CheckMainSiteAdminMiddleware::class)->name('admin.')->group(function () {
                 Route::delete('/tenant/{tenantIds}/subscription', [AdminTenantsController::class, 'cancelSubscription'])->name('tenants.cancelSubscription');
                 Route::resource('tenants', AdminTenantsController::class);
 
@@ -117,6 +118,16 @@ foreach (config('tenancy.central_domains') as $domain) {
 
 
 
+// Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
+// Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
+
+Route::get('/paypal/success', function(){
+    return 'success';
+})->name('paypal.success');
+Route::get('/paypal/cancel', function(){
+    return 'cancel';
+})->name('paypal.cancel');
+
 
         });
         /////////////////////////////// end of tenant part ///////////////////////////////////////////////////////////////////////////////////////////
@@ -124,6 +135,12 @@ foreach (config('tenancy.central_domains') as $domain) {
     });
 
 }
+
+
+
+Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle'])->name('paypal.webhook');
+
+
 
 
 //////////// to change lang /////////
@@ -144,9 +161,9 @@ Route::fallback(function () {
 
 /// remember this site does not work with laravel herd   it works well with xampp
 /// subsomains starts like this    http://ali.localhost:8000/login ;
+//  ليست كل العملات مسموح بها في باي بال يجب ان تكون العملة مضافة اولا على باي بال على ادارة حساب البزنس - الحساب  المدفوعات والحسابات البنكية والبطاقات - العملات 
 
-
-
+// check the observer
 // check home.vue
 // check trial days here and on stripe.com
 
@@ -155,3 +172,42 @@ Route::fallback(function () {
 
 
 // search for =>  check payment method for queries   <=  to make queries depends on payment method
+
+// any extra items in tenantSubscription has to be moved to subscription model anc modify controllers for that
+
+
+
+// start from class SubscriptionController   in Additional Configuration and Views
+
+
+/// paypall changes
+// php artisan schedule:work  # For development
+
+// user subscription => tenant subscription  model and migration    
+// subscription plan => plan model and migration 
+// tenant subscription model      function userSubscriptions =>  subscriptions  
+// tenant subscription table   user_id => tenant_id , subscription_plan_id => plan_id
+
+// move extra data in TenantSubscription to Subscription and modify all files witch use it 
+// convert tenant subscription for paypal to subscription and add required fields in subscription witch comes from cashier
+
+// processSubscriptionRenewal.php is for paypal    for stripe we depends on listener 
+
+
+
+// check this part 
+// // Add middleware to exclude webhook from CSRF protection
+// // In app/Http/Middleware/VerifyCsrfToken.php
+// protected $except = [
+//     'paypal/webhook',
+// ];
+
+
+
+
+// to activate or deactivate plan :
+// Deactivate a plan
+// $paypalService->deactivatePlan('P-123456789');
+
+// // Reactivate a plan
+// $paypalService->activatePlan('P-123456789');

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscription
@@ -13,10 +14,11 @@ class CheckSubscription
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next ,  $feature = null): Response
+    public function handle(Request $request, Closure $next, $feature = null): Response
     {
-         $tenant = tenant();
-        
+        $tenant = tenant();
+
+
         if (!$tenant) {
             return redirect()->route('tenant.select');
         }
@@ -31,5 +33,5 @@ class CheckSubscription
 
         return $next($request);
     }
-    
+
 }

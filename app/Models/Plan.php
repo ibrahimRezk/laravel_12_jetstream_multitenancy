@@ -11,8 +11,12 @@ class Plan extends Model
 
     protected $fillable = [
         'name',
+        
         'price_id_on_stripe',
         'product_id_on_stripe',
+        'paypal_product_id', // new
+        'paypal_plan_id', // new
+
         'description',
         'price',
         'currency',

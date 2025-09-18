@@ -6,5 +6,7 @@ return [
     App\Providers\JetstreamServiceProvider::class,
 
     App\Providers\TenancyServiceProvider::class,
+    App\Providers\PayPalServiceProvider::class,// new 
+
 
 ];
