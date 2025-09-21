@@ -12,7 +12,6 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\AdminPlanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminTenantsController;
-use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\AdminSubscriptionController;
 use App\Http\Middleware\CheckMainSiteAdminMiddleware;
 use App\Http\Controllers\TenantSubscriptionController;
@@ -118,15 +117,6 @@ foreach (config('tenancy.central_domains') as $domain) {
 
 
 
-// Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
-// Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
-
-Route::get('/paypal/success', function(){
-    return 'success';
-})->name('paypal.success');
-Route::get('/paypal/cancel', function(){
-    return 'cancel';
-})->name('paypal.cancel');
 
 
         });
@@ -138,7 +128,6 @@ Route::get('/paypal/cancel', function(){
 
 
 
-Route::post('/paypal/webhook', [PayPalWebhookController::class, 'handle'])->name('paypal.webhook');
 
 
 
@@ -158,6 +147,14 @@ Route::fallback(function () {
 });
 
 
+
+
+////////run php artisan cashier:webhook 
+///// then run =>  stripe listen --forward-to http://laraveljetstreamshadcntailwind4multitenancy.test/stripe/webhook
+///// or then run =>  stripe listen --forward-to http://laravel_12_jetstream_multitenancy.test/stripe/webhook     depends on the site
+
+
+    
 
 /// remember this site does not work with laravel herd   it works well with xampp
 /// subsomains starts like this    http://ali.localhost:8000/login ;
@@ -180,34 +177,5 @@ Route::fallback(function () {
 // start from class SubscriptionController   in Additional Configuration and Views
 
 
-/// paypall changes
-// php artisan schedule:work  # For development
-
-// user subscription => tenant subscription  model and migration    
-// subscription plan => plan model and migration 
-// tenant subscription model      function userSubscriptions =>  subscriptions  
-// tenant subscription table   user_id => tenant_id , subscription_plan_id => plan_id
-
-// move extra data in TenantSubscription to Subscription and modify all files witch use it 
-// convert tenant subscription for paypal to subscription and add required fields in subscription witch comes from cashier
-
-// processSubscriptionRenewal.php is for paypal    for stripe we depends on listener 
 
 
-
-// check this part 
-// // Add middleware to exclude webhook from CSRF protection
-// // In app/Http/Middleware/VerifyCsrfToken.php
-// protected $except = [
-//     'paypal/webhook',
-// ];
-
-
-
-
-// to activate or deactivate plan :
-// Deactivate a plan
-// $paypalService->deactivatePlan('P-123456789');
-
-// // Reactivate a plan
-// $paypalService->activatePlan('P-123456789');

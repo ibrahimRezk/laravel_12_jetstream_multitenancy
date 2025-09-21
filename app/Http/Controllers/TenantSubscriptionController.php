@@ -17,7 +17,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 
-use App\Services\PayPalService;
 use App\Models\SubscriptionPlan;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -30,7 +29,7 @@ class TenantSubscriptionController extends Controller
 
     protected $planService;
 
-    public function __construct(PlanService $planService , protected PayPalService $paypalService)
+    public function __construct(PlanService $planService )
     {
         $this->planService = $planService;
                 // $this->middleware('auth');
@@ -91,8 +90,6 @@ class TenantSubscriptionController extends Controller
                         'description' => $plan->description,
                         'price_id_on_stripe' => $plan->price_id_on_stripe,
                         'product_id_on_stripe' => $plan->product_id_on_stripe,
-                        'paypal_product_id' => $plan->paypal_product_id,
-                        'paypal_plan_id' => $plan->paypal_plan_id,
                         'price' => $plan->price,
                         'currency' => $plan->currency,
                         'interval' => $plan->interval,
@@ -163,17 +160,9 @@ class TenantSubscriptionController extends Controller
 
 
         try {
-            if($request->pay_with == 'paypal'){
-                $paypalService = new PayPalService();
-                $result =  $paypalService->createSubscription($newPlan->paypal_plan_id);
-                $payment_url = $result->links[0]['href'];
-                
-                return redirect()->away($payment_url);
-
-            }elseif($request->pay_with == 'stripe')
-            {
+            
                 return StripePaymentService::processRecurringPayment($newPlan, $changeSubscription);
-            }
+            
 
             // after payment success there is webhook event comes from stripe  and stripewebhook listener  and in case of success it will complete subscription in the listener
             //////////// end         //// check payment method for queries ////////////////////////////////////////

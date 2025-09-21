@@ -23,10 +23,7 @@ return new class extends Migration {
 
             // $table->foreignId('user_id')->constrained()->onDelete('cascade');
             // $table->foreignId('subscription_plan_id')->constrained();
-            $table->string('paypal_subscription_id')->nullable();  // new
-            $table->timestamp('starts_at')->nullable();  // new
-            $table->timestamp('cancelled_at')->nullable();  // new
-            $table->json('paypal_data')->nullable(); // Store PayPal response data  // new
+
 
 
             $table->timestamps();

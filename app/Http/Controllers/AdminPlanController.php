@@ -8,7 +8,6 @@ use Inertia\Inertia;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use App\Services\PlanService;
-use App\Services\PayPalService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\PlanRequest;
 use App\Http\Controllers\Controller;
@@ -33,16 +32,11 @@ class AdminPlanController extends Controller
 
     protected $planService;
 
-    //// new 
-    // protected $signature = 'paypal:setup-plans'; // new 
-    // protected $description = 'Create PayPal billing plans for subscription plans'; // new 
-    protected $paypalService; // new 
 
-    public function __construct(PlanService $planService, PayPalService $paypalService)
+    public function __construct(PlanService $planService)
     {
         // parent::__construct();
         $this->planService = $planService;
-        $this->paypalService = $paypalService; // new 
 
     }
 
@@ -83,8 +77,6 @@ class AdminPlanController extends Controller
                         'currency' => $plan->currency,
                         // 'price_id_on_stripe' => $plan->price_id_on_stripe,
                         // 'product_id_on_stripe' => $plan->product_id_on_stripe,
-                        // 'paypal_product_id' => $plan->paypal_product_id,
-                        // 'paypal_plan_id' => $plan->paypal_plan_id,
                         'interval' => $plan->interval,
                         'features' => $plan->features,
                         'trial_days' => $plan->trial_days,
@@ -102,10 +94,6 @@ class AdminPlanController extends Controller
     public function store(PlanRequest $request)
     {
 
-        // check first if the currency is allowed on paypal and stripe or not 
-//  ليست كل العملات مسموح بها في باي بال يجب ان تكون العملة مضافة اولا على باي بال على ادارة حساب البزنس - الحساب  المدفوعات والحسابات البنكية والبطاقات - العملات 
-
-
 
         $plansCount = Plan::count();
         $modifiedFeatures = [];
@@ -119,8 +107,7 @@ class AdminPlanController extends Controller
         $data['price'] = $request->price;
         // $data['price_id_on_stripe'] = $request->price_id_on_stripe;
         // $data['product_id_on_stripe'] = $request->product_id_on_stripe;
-        // $data['paypal_product_id'] = $request->paypal_product_id; // it will be generated down here in the same function
-        // $data['paypal_plan_id'] = $request->paypal_plan_id; // it will be generated down here in the same function
+
         $data['currency'] = $request->currency;
         $data['interval'] = $request->interval;
         $data['features'] = $modifiedFeatures;
@@ -156,51 +143,6 @@ class AdminPlanController extends Controller
         ////////////////////////////////// end stripe section /////////////////////////////////////////
 
 
-
-
-
-        //// new  paypal section  //////////////////////////////////////////////////////////
-
-        try {
-
-            if (!$plan->paypal_product_id) {
-                // $this->info("Creating PayPal product for: {$plan->name}");
-
-                $product = $this->paypalService->createProduct([
-                    'name' => $plan->name . ' Subscription',
-                    'description' => $plan->description ?: "Annual {$plan->name} subscription plan",
-                    'image_url' => null
-                ]);
-
-                $plan->update(['paypal_product_id' => $product->id]);
-                // $this->info("✅ Created PayPal product: {$product->id}");
-            }
-
-            // $this->info("Creating PayPal plan for: {$plan->name}");
-
-            $paypalPlan = $this->paypalService->createPlan(
-                $plan->paypal_product_id,
-                [
-                    'name' => $plan->name . ' Plan',
-                    'description' => $plan->description ?: "Annual {$plan->name} subscription plan",
-                    'price' => $plan->price,
-                    'currency_code' => $plan->currency,
-                    'interval' => $request->interval
-                ]
-            );
-
-
-            $plan->update(['paypal_plan_id' => $paypalPlan->id ]);
-            // $plan->update(['paypal_plan_id' => $paypalPlan->getId()]);
-
-            // $this->info("✅ Created PayPal plan for {$plan->name}: {$paypalPlan->getId()}");
-
-        } catch (\Exception $e) {
-            // $this->error("❌ Failed to create PayPal plan for {$plan->name}: " . $e->getMessage());
-        }
-
-        ////////////////////////////////////// paypal end ////////////////////////////////////////////////////////
-
         return back()->with('success', 'Plan created successfully.');
 
 
@@ -220,8 +162,7 @@ class AdminPlanController extends Controller
         $data['description'] = $request->description;
         // $data['price_id_on_stripe'] = $request->price_id_on_stripe;
         // $data['product_id_on_stripe'] = $request->product_id_on_stripe;
-        // $data['paypal_product_id'] = $request->paypal_product_id;
-        // $data['paypal_plan_id'] = $request->paypal_plan_id;
+
         $data['price'] = $request->price;
         $data['currency'] = $request->currency;
         $data['interval'] = $request->interval;
@@ -292,28 +233,7 @@ class AdminPlanController extends Controller
 
         ////////////////////////////////// stripe end ///////////////////////////////////////////////////////////////
 
-        ////////////////////////////////// paypal update /////////////////////////////////////////////////
-        $this->paypalService->updatePlan($plan->paypal_plan_id, [
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'currency_code' => $request->currency,
-            'interval_unit' => $request->interval, // MONTH, YEAR, WEEK, DAY
-            // 'interval_count' => 1,
-            'setup_fee' => 0,
-            'auto_bill_outstanding' => true,
-            'payment_failure_threshold' => 3
-        ]);
-
-
-        $this->paypalService->updateProduct($plan->paypal_product_id, [
-            'name' => $request->name . ' Subscription',
-            'description' => $request->description,
-            'category' => 'SOFTWARE',
-            // 'image_url' => 'https://example.com/new-image.jpg',
-            // 'home_url' => 'https://example.com'
-        ]);
-
+    
 
 
 

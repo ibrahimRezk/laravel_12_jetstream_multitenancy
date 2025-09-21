@@ -63,7 +63,6 @@ class AdminTenantsController extends Controller
             // dd($tenants);
             $plans = PlanResource::collection(Plan::get());
 
-
             // dd($tenants[0]->currentSubscription() );
             return Inertia::render('AllTenants/Index', [
                 'title' => 'all tenants',

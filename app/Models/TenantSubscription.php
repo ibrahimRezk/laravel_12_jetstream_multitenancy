@@ -10,10 +10,7 @@ class TenantSubscription extends Model  // this to get all subscriptions history
 {
     use BelongsToTenant;  //// notice this trait
 
-//     public static function boot(): void
-// {
-//     TenantSubscription::observe(TenantSubscriptionObserver::class); // new 
-// }
+
 
     protected $fillable = [
         'tenant_id',
@@ -26,19 +23,13 @@ class TenantSubscription extends Model  // this to get all subscriptions history
         'created_at',
         'updated_at' ,
 
-        'paypal_subscription_id', // new
-        'starts_at', // new
-        'cancelled_at', // new
-        'paypal_data', // new
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'ends_at' => 'datetime',
 
-        'starts_at' => 'datetime', // new
-        'cancelled_at' => 'datetime', // new
-        'paypal_data' => 'array' // new
+
 
     ];
 

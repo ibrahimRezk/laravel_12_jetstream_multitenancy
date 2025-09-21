@@ -55,8 +55,7 @@ const form = useForm({
     description: "",
     // product_id_on_stripe: "",
     // price_id_on_stripe: "",
-    // paypal_product_id: "",
-    // paypal_plan_id: "",
+
     price: "",
     currency: "",
     interval: "",
@@ -415,36 +414,7 @@ const formatFeature = (feature) => {
                                     :message="props.errors?.price_id_on_stripe"
                                 />
                             </div> -->
-                            <!-- <div class="grid gap-2 mt-4">
-                                <Label for="name"> paypal_product_id </Label>
-                                <Input
-                                    id="paypal_product_id"
-                                    v-model="form.paypal_product_id"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    autofocus
-                                    autocomplete="paypal_product_id"
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="props.errors?.paypal_product_id"
-                                />
-                            </div> -->
-                            <!-- <div class="grid gap-2 mt-4">
-                                <Label for="name"> paypal_plan_id </Label>
-                                <Input
-                                    id="paypal_plan_id"
-                                    v-model="form.paypal_plan_id"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    autofocus
-                                    autocomplete="paypal_plan_id"
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="props.errors?.paypal_plan_id"
-                                />
-                            </div> -->
+      
                             <div class="grid gap-2 mt-4">
                                 <Label for="name"> price </Label>
                                 <Input

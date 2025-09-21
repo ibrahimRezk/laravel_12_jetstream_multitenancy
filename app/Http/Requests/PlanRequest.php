@@ -32,8 +32,6 @@ class PlanRequest extends FormRequest
             'description' => 'nullable|string|max:1000',
             // 'price_id_on_stripe' => 'required|string', // Add other intervals as needed
             // 'product_id_on_stripe' => 'required|string', // Add other intervals as needed
-            // 'paypal_product_id' => 'required|string', // Add other intervals as needed
-            // 'paypal_plan_id' => 'required|string', // Add other intervals as needed
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
             'interval' => 'required|string|in:day,week,month,year', // Add other intervals as needed

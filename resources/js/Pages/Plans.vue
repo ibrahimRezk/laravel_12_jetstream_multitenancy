@@ -66,7 +66,6 @@ const activeForm = ref("");
 const showScreenExeptSubmenu = ref(false);
 const routeResourceName = ref(props.routeResourceName);
 const editMode = ref(false);
-const pay_with = ref('');
 
 const selectedPlan = ref(null);
 const changePlan = ref(false);
@@ -118,14 +117,7 @@ const formatPrice = (price) => {
     return parseFloat(price).toFixed(2);
 };
 
-const gotoPaypalPayment = ()=>{
-    
-    console.log('here')
-    router.get(route('tenant.checkout', {
-                            plan_id: selectedPlan.id,
-                            pay_with: pay_with
-                        }))
-}
+
 
 const formatFeature = (feature) => {
     return feature
@@ -319,25 +311,7 @@ const formatFeature = (feature) => {
                     </button> -->
                 <!-- </form> -->
 
-                <p class="mt-5">Choose your payment method:</p>
-                <input
-                    type="radio"
-                    id="paypal"
-                    value="paypal"
-                    v-model="pay_with"
-                    name="pay_with"
-                />
 
-                <label for="paypal">Paypal</label><br />
-
-                <input
-                    type="radio"
-                    id="stripe"
-                    value="stripe"
-                    v-model="pay_with"
-                    name="pay_with"
-                />
-                <label for="stripe">Stripe</label><br />
 
 
                 <a
@@ -345,8 +319,7 @@ const formatFeature = (feature) => {
                     class="mb-2 px-12 py-1 rounded-full text-white bg-gradient-to-l border-orange-100 duration-300 capitalize tracking-wider shadow-black drop-shadow-2xl shadow-2xl border text-sm ease-in-out hover:scale-110 from-orange-800 to-orange-500 hover:from-orange-900 hover:to-orange-500"
                     :href="
                         route('tenant.checkout', {
-                            plan_id: selectedPlan.id,
-                            pay_with: pay_with
+                            plan_id: selectedPlan.id
                         })
                     "
                 >

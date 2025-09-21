@@ -20,8 +20,6 @@ class PlanResource extends JsonResource
             'description' => $this->description,
             'price_id_on_stripe' => $this->price_id_on_stripe,
             'product_id_on_stripe' => $this->product_id_on_stripe,
-            'paypal_product_id' => $this->paypal_product_id,
-            'paypal_plan_id' => $this->paypal_plan_id,
             'price' => $this->price,
             'currency' => $this->currency,
             'interval' => $this->interval,
