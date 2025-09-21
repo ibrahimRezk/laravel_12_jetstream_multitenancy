@@ -316,7 +316,7 @@ const formatFeature = (feature) => {
 
                 <a
                     as="a"
-                    class="mb-2 px-12 py-1 rounded-full text-white bg-gradient-to-l border-orange-100 duration-300 capitalize tracking-wider shadow-black drop-shadow-2xl shadow-2xl border text-sm ease-in-out hover:scale-110 from-orange-800 to-orange-500 hover:from-orange-900 hover:to-orange-500"
+                    class="mb-2 mt-5 px-12 py-1 rounded-full text-white bg-gradient-to-l border-orange-100 duration-300 capitalize tracking-wider shadow-black drop-shadow-2xl shadow-2xl border text-sm ease-in-out hover:scale-110 from-orange-800 to-orange-500 hover:from-orange-900 hover:to-orange-500"
                     :href="
                         route('tenant.checkout', {
                             plan_id: selectedPlan.id
